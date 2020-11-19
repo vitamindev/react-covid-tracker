@@ -1,23 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter } from "react-router-dom";
+import "./App.css";
+import { fetchCountriesData, fetchTimelineData } from "./api";
+
+import AppLayout from "./components/AppLayout/AppLayout";
+import CountryPanel from "./components/SideBar/SideBar";
+
+import { CssBaseline } from "@material-ui/core";
 
 function App() {
+  const [timeline, setTimeline] = useState([]);
+  const [countries, setCountries] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const countryData = await fetchCountriesData();
+      setCountries(countryData);
+
+      const timelineData = await fetchTimelineData();
+      setTimeline(timelineData);
+    };
+
+    loadData();
+  }, []);
+
+  const todayTimeline = timeline[0];
+  const drawer = todayTimeline && (
+    <CountryPanel {...{ todayTimeline, countries }}></CountryPanel>
+  );
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <CssBaseline />
+      <BrowserRouter>
+        <AppLayout
+          drawer={drawer}
+          countryList={countries}
+          timeline={timeline}
+        />
+      </BrowserRouter>
     </div>
   );
 }
